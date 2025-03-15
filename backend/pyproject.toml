@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "doc-query-backend"
+version = "0.1.0"
+description = "RAG application using FastAPI and pgvector"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+packages = [
+    {include = "app"}
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "0.104.1"
+uvicorn = "0.24.0"
+python-multipart = "0.0.6"
+python-dotenv = "1.0.0"
+sqlalchemy = "2.0.25"
+psycopg2-binary = "2.9.9"
+pgvector = "0.2.5"
+openai = "1.12.0"
+langchain = "^0.1.4"
+langchain-community = "^0.0.15"
+langchain-core = "^0.1.14"
+langchain-openai = "^0.0.5"
+pypdf = "3.17.0"
+python-docx = "1.0.1"
+tiktoken = "0.5.2"
+pydantic-settings = "^2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "7.4.3"
+httpx = "0.25.1"
+black = "^23.11.0"
+isort = "^5.12.0"
+pytest-cov = "^4.1.0"
+mypy = "^1.6.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "langchain.*",
+    "pypdf.*",
+    "docx.*",
+    "tiktoken.*",
+    "pgvector.*"
+]
+ignore_missing_imports = true 
