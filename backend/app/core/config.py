@@ -1,5 +1,5 @@
 import secrets
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Literal
 
 from pydantic import AnyHttpUrl, PostgresDsn, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -56,12 +56,35 @@ class Settings(BaseSettings):
             return int(v)
         return v
     
+    # Model Provider Settings
+    MODEL_PROVIDER: Literal["openai", "local", "huggingface"] = "openai"
+    
     # OpenAI Settings
     OPENAI_API_KEY: str = ""
     
+    # Local Model Settings
+    LOCAL_EMBEDDING_MODEL_PATH: str = ""
+    LOCAL_COMPLETION_MODEL_PATH: str = ""
+    LOCAL_MODEL_SERVER_URL: str = "http://localhost:8080"
+    
+    # HuggingFace Settings
+    HUGGINGFACE_API_KEY: str = ""
+    
     # Vector Settings
     VECTOR_COLLECTION_NAME: str = "document_embeddings"
-    EMBEDDING_MODEL: str = "text-embedding-3-small"
-    COMPLETION_MODEL: str = "gpt-4o"
+    
+    # Default Model Names
+    EMBEDDING_MODEL: str = "text-embedding-3-small"  # OpenAI default
+    COMPLETION_MODEL: str = "gpt-4o"                 # OpenAI default
+    
+    # Alternative Model Names
+    LOCAL_EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"  # HF model ID for local use
+    LOCAL_COMPLETION_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.2"
+    
+    HUGGINGFACE_EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
+    HUGGINGFACE_COMPLETION_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.2"
+    
+    # Model Parameters
+    EMBEDDING_DIMENSION: int = 1536  # OpenAI default, may change with other models
     
 settings = Settings() 

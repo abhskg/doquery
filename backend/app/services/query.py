@@ -2,6 +2,7 @@ from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 
 from app.models.document import DocumentChunk
+from app.ml.provider import get_model_provider
 
 
 class QueryService:
@@ -20,7 +21,25 @@ class QueryService:
     @staticmethod
     def generate_answer(question: str, context_chunks: List[DocumentChunk]) -> Dict[str, Any]:
         """
-        Generate an answer using OpenAI based on the question and context chunks.
+        Generate an answer using the configured model provider based on the question and context chunks.
+        
+        Args:
+            question: The user's question
+            context_chunks: Document chunks retrieved as context for answering
+            
+        Returns:
+            Dictionary with the generated answer and metadata
         """
-        # Implementation will be added later
-        pass 
+        # Get the configured model provider
+        provider = get_model_provider()
+        
+        # Combine context chunks into a single context string
+        context = "\n\n".join([chunk.content for chunk in context_chunks])
+        
+        # Generate completion with the provider
+        return provider.generate_completion(
+            prompt=question,
+            context=context,
+            temperature=0.7,  # Moderate creativity
+            max_tokens=500    # Reasonable response length
+        ) 
