@@ -2,7 +2,7 @@
 name = "doc-query-backend"
 version = "0.1.0"
 description = "RAG application using FastAPI and pgvector"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Abhas Gorain <abhas.gorain@gmail.com>"]
 readme = "README.md"
 
 packages = [
@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 fastapi = "0.104.1"
 uvicorn = "0.24.0"
 python-multipart = "0.0.6"
