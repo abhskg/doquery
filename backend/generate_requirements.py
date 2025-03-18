@@ -15,29 +15,31 @@ def extract_deps_from_pyproject(pyproject_path):
         content = f.read()
 
     # Extract the main dependencies section
-    deps_section = re.search(r"\[tool\.poetry\.dependencies\](.*?)(?=\[tool|$)", content, re.DOTALL)
+    deps_section = re.search(
+        r"\[tool\.poetry\.dependencies\](.*?)(?=\[tool|$)", content, re.DOTALL
+    )
     if not deps_section:
         print("Could not find dependencies section in pyproject.toml")
         sys.exit(1)
-    
+
     deps_text = deps_section.group(1)
-    
+
     # Parse dependencies
     deps = []
-    for line in deps_text.strip().split('\n'):
+    for line in deps_text.strip().split("\n"):
         line = line.strip()
-        if not line or line.startswith('#') or line == "python = ":
+        if not line or line.startswith("#") or line == "python = ":
             continue
-        
+
         # Match package name and version
         match = re.match(r'([a-zA-Z0-9\-_]+)\s*=\s*["\']([^"\']+)["\']', line)
         if match:
             package, version = match.groups()
             # Handle caret version range (^x.y.z) by removing the caret
-            if version.startswith('^'):
+            if version.startswith("^"):
                 version = version[1:]
             deps.append(f"{package}=={version}")
-    
+
     return deps
 
 
@@ -51,13 +53,13 @@ if __name__ == "__main__":
     script_dir = Path(__file__).parent
     pyproject_path = script_dir / "pyproject.toml"
     requirements_path = script_dir / "requirements.txt"
-    
+
     print(f"Generating {requirements_path} from {pyproject_path}...")
-    
+
     deps = extract_deps_from_pyproject(pyproject_path)
     write_requirements_txt(deps, requirements_path)
-    
+
     print(f"Successfully generated {requirements_path} with {len(deps)} dependencies.")
     print("Generated requirements:")
     for dep in deps:
-        print(f"  - {dep}") 
+        print(f"  - {dep}")

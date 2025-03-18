@@ -16,4 +16,7 @@ async def query_documents(
     Query against embedded documents and return AI-generated answers.
     """
     # RAG query logic will be implemented here
-    return {"question": query.question, "answer": "This is where the AI-generated answer will appear."} 
+    return {
+        "question": query.question,
+        "answer": "This is where the AI-generated answer will appear.",
+    }

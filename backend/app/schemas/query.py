@@ -10,4 +10,4 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     question: str
     answer: str
-    sources: Optional[List[str]] = None 
+    sources: Optional[List[str]] = None

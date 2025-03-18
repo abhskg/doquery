@@ -24,4 +24,4 @@ class DocumentChunk(Base):
     content = Column(Text, nullable=False)
     embedding = Column(ARRAY(FLOAT), nullable=True)
     token_count = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow) 
+    created_at = Column(DateTime, default=datetime.utcnow)

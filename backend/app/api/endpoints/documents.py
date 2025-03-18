@@ -16,4 +16,4 @@ async def upload_document(
     Upload a document to be processed and embedded.
     """
     # Document processing and embedding logic will be implemented here
-    return {"filename": file.filename, "status": "Document processed and embedded"} 
+    return {"filename": file.filename, "status": "Document processed and embedded"}

@@ -2,4 +2,4 @@
 
 from app.ml.provider import get_model_provider
 
-__all__ = ["get_model_provider"] 
+__all__ = ["get_model_provider"]
