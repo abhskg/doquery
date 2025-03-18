@@ -40,3 +40,26 @@ class DocumentChunkResponse(DocumentChunkBase):
 
     class Config:
         from_attributes = True
+
+
+class DocumentSearchQuery(BaseModel):
+    query: str
+    limit: int = 5
+
+
+class SearchResultItem(BaseModel):
+    document_id: UUID
+    chunk_id: UUID
+    document_filename: str
+    content: str
+    chunk_index: int
+    similarity: float
+
+    class Config:
+        from_attributes = True
+
+
+class SearchResponse(BaseModel):
+    results: List[SearchResultItem]
+    total: int
+    query: str
