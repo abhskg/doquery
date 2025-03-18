@@ -65,3 +65,18 @@ next-env.d.ts
 config/.env
 backend/.env
 frontend/.env 
+
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js
+.next/
+out/
+build/
+
+# Tailwind CSS
+*.css
+*.scss
+*.sass
