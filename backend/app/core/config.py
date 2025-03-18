@@ -1,8 +1,12 @@
 import secrets
+import os
 from typing import Any, Dict, List, Optional, Union, Literal
 
 from pydantic import AnyHttpUrl, PostgresDsn, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -60,31 +64,31 @@ class Settings(BaseSettings):
     MODEL_PROVIDER: Literal["openai", "local", "huggingface"] = "openai"
     
     # OpenAI Settings
-    OPENAI_API_KEY: str = ""
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     
     # Local Model Settings
-    LOCAL_EMBEDDING_MODEL_PATH: str = ""
-    LOCAL_COMPLETION_MODEL_PATH: str = ""
-    LOCAL_MODEL_SERVER_URL: str = "http://localhost:8080"
+    LOCAL_EMBEDDING_MODEL_PATH: str = os.getenv("LOCAL_EMBEDDING_MODEL_PATH", "")
+    LOCAL_COMPLETION_MODEL_PATH: str = os.getenv("LOCAL_COMPLETION_MODEL_PATH", "")
+    LOCAL_MODEL_SERVER_URL: str = os.getenv("LOCAL_MODEL_SERVER_URL", "http://localhost:8080")
     
     # HuggingFace Settings
-    HUGGINGFACE_API_KEY: str = ""
+    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY", "")
     
     # Vector Settings
-    VECTOR_COLLECTION_NAME: str = "document_embeddings"
+    VECTOR_COLLECTION_NAME: str = os.getenv("VECTOR_COLLECTION_NAME", "document_embeddings")
     
     # Default Model Names
-    EMBEDDING_MODEL: str = "text-embedding-3-small"  # OpenAI default
-    COMPLETION_MODEL: str = "gpt-4o"                 # OpenAI default
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")  # OpenAI default
+    COMPLETION_MODEL: str = os.getenv("COMPLETION_MODEL", "gpt-4o")                 # OpenAI default
     
     # Alternative Model Names
-    LOCAL_EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"  # HF model ID for local use
-    LOCAL_COMPLETION_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.2"
+    LOCAL_EMBEDDING_MODEL: str = os.getenv("LOCAL_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")  # HF model ID for local use
+    LOCAL_COMPLETION_MODEL: str = os.getenv("LOCAL_COMPLETION_MODEL", "mistralai/Mistral-7B-Instruct-v0.2")
     
-    HUGGINGFACE_EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
-    HUGGINGFACE_COMPLETION_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.2"
+    HUGGINGFACE_EMBEDDING_MODEL: str = os.getenv("HUGGINGFACE_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+    HUGGINGFACE_COMPLETION_MODEL: str = os.getenv("HUGGINGFACE_COMPLETION_MODEL", "mistralai/Mistral-7B-Instruct-v0.2")
     
     # Model Parameters
-    EMBEDDING_DIMENSION: int = 1536  # OpenAI default, may change with other models
+    EMBEDDING_DIMENSION: int = os.getenv("EMBEDDING_DIMENSION", 1536)  # OpenAI default, may change with other models
     
 settings = Settings() 
