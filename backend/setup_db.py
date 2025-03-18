@@ -47,7 +47,7 @@ def setup_database():
         
         # Check if our database exists
         logger.info(f"Checking if database '{settings.POSTGRES_DB}' exists...")
-        cursor.execute(f"SELECT 1 FROM pg_database WHERE datname = '{settings.POSTGRES_DB}'")
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (settings.POSTGRES_DB,))
         db_exists = cursor.fetchone()
         
         # Create database if it doesn't exist

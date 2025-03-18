@@ -3,6 +3,7 @@
 import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy import text
 
 from app.db.base import Base
 from app.db.session import engine
@@ -18,13 +19,22 @@ def init_db() -> None:
         # Create tables
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
+        # Log database connection details
+        db_url = str(engine.url).replace(":*****@", "@")  # Hide password
+        logger.info(f"Database connection details: {db_url}")
         
         # Check for pgvector extension
         with engine.connect() as conn:
             try:
-                conn.execute("SELECT CASE WHEN EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector') THEN 1 ELSE 0 END")
-                logger.info("pgvector extension check completed")
-            except ProgrammingError:
+                # Use text() to create a properly executable SQL statement
+                result = conn.execute(text("SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector')"))
+                if result.scalar():
+                    logger.info("pgvector extension is installed")
+                else:
+                    logger.warning("pgvector extension is not installed. Vector search will not work properly.")
+                    logger.info("You can install pgvector with 'CREATE EXTENSION vector;' in your PostgreSQL database.")
+            except ProgrammingError as e:
+                logger.warning(f"Error checking pgvector extension: {str(e)}")
                 logger.warning("pgvector extension not found. Vector search may not work properly.")
                 logger.info("You can install pgvector with 'CREATE EXTENSION vector;' in your PostgreSQL database.")
         

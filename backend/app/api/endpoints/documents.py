@@ -3,9 +3,10 @@ from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 import uuid
 import logging
+from sqlalchemy import text
 
 from app.db.session import get_db
-from app.schemas.document import DocumentResponse, DocumentChunkResponse, DocumentSearchQuery, SearchResponse
+from app.schemas.document import DocumentResponse, DocumentChunkResponse
 from app.services.document import DocumentService
 
 router = APIRouter()
@@ -209,35 +210,6 @@ async def get_document_chunks(document_id: uuid.UUID, db: Session = Depends(get_
             detail=f"Error retrieving document chunks: {str(e)}",
         )
 
-@router.post("/search", response_model=SearchResponse, status_code=status.HTTP_200_OK)
-async def search_documents(
-    search_query: DocumentSearchQuery,
-    db: Session = Depends(get_db)
-):
-    """
-    Search for document chunks that match the query.
-    """
-    try:
-        # Search for document chunks that match the query
-        results = DocumentService.search_documents(
-            db=db, 
-            query=search_query.query,
-            limit=search_query.limit
-        )
-        
-        # Return search results
-        return {
-            "results": results,
-            "total": len(results),
-            "query": search_query.query
-        }
-    except Exception as e:
-        logger.error(f"Error searching documents: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error searching documents: {str(e)}",
-        )
-
 @router.get("/db-check", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
 async def check_db_connection(db: Session = Depends(get_db)):
     """
@@ -245,24 +217,25 @@ async def check_db_connection(db: Session = Depends(get_db)):
     """
     try:
         # Try to execute a simple query to check the connection
-        result = db.execute("SELECT 1").scalar()
+        result = db.execute(text("SELECT 1")).scalar()
         
         # Check if document table exists
         table_exists = db.execute(
-            "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'document')"
+            text("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'document')")
         ).scalar()
         
         # Get all tables in the database
         tables = db.execute(
-            "SELECT table_name FROM information_schema.tables WHERE table_schema='public'"
+            text("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
         ).scalars().all()
         
         # Check if pgvector extension is installed
         try:
             vector_extension = db.execute(
-                "SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector')"
+                text("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector')")
             ).scalar()
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Error checking pgvector extension: {str(e)}")
             vector_extension = False
         
         # Check database connection details
