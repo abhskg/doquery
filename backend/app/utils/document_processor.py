@@ -2,7 +2,7 @@ import io
 import os
 import tempfile
 import logging
-from typing import Tuple
+from typing import Tuple, List
 from fastapi import HTTPException, status
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,42 @@ class DocumentProcessor:
                         import docx
                         # Process DOCX using python-docx
                         doc = docx.Document(temp_path)
-                        extracted_text = "\n".join([para.text for para in doc.paragraphs])
+                        
+                        # Extract all document content
+                        text_parts = []
+                        
+                        # Extract text from paragraphs
+                        for para in doc.paragraphs:
+                            if para.text.strip():
+                                text_parts.append(para.text)
+                        
+                        # Extract text from tables
+                        for table in doc.tables:
+                            for row in table.rows:
+                                row_text = []
+                                for cell in row.cells:
+                                    # Get text from cell paragraphs
+                                    cell_text = ' '.join([p.text for p in cell.paragraphs if p.text.strip()])
+                                    if cell_text:
+                                        row_text.append(cell_text)
+                                if row_text:
+                                    text_parts.append(' | '.join(row_text))
+                        
+                        # Extract text from headers
+                        for section in doc.sections:
+                            header = section.header
+                            if header:
+                                header_text = ' '.join([p.text for p in header.paragraphs if p.text.strip()])
+                                if header_text:
+                                    text_parts.append(f"Header: {header_text}")
+                            
+                            footer = section.footer
+                            if footer:
+                                footer_text = ' '.join([p.text for p in footer.paragraphs if p.text.strip()])
+                                if footer_text:
+                                    text_parts.append(f"Footer: {footer_text}")
+                        
+                        extracted_text = "\n".join(text_parts)
                         logger.debug(f"Extracted {len(extracted_text)} characters from DOCX")
                         content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     finally:
