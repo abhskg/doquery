@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     
     # Chunk Settings
-    CHUNK_SIZE: int = 1000
+    CHUNK_SIZE: int = 10000
     OVERLAP_PERCENTAGE: float = 20
     CHUNK_OVERLAP: int = int(CHUNK_SIZE * (OVERLAP_PERCENTAGE / 100))
     CHUNK_SEPARATOR: str = "\n\n"
