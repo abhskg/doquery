@@ -80,3 +80,8 @@ build/
 *.css
 *.scss
 *.sass
+
+# Logs
+.logs/
+backend/logs/
+

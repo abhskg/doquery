@@ -19,16 +19,17 @@ class Settings(BaseSettings):
 
     # CORS Settings
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    
+    # Chunk Settings
+    CHUNK_SIZE: int = 1000
+    OVERLAP_PERCENTAGE: float = 20
+    CHUNK_OVERLAP: int = int(CHUNK_SIZE * (OVERLAP_PERCENTAGE / 100))
+    CHUNK_SEPARATOR: str = "\n\n"
 
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(
-        cls, v: Union[str, List[str]], info: ValidationInfo
-    ) -> Union[List[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
+    # Logging Settings
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    LOG_DIR: str = "logs"
 
     PROJECT_NAME: str = "RAG Query API"
 
@@ -39,6 +40,16 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "doc_query"
     POSTGRES_PORT: int = 5432
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    def assemble_cors_origins(
+        cls, v: Union[str, List[str]], info: ValidationInfo
+    ) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
     def assemble_db_connection(cls, v: Optional[str], info: ValidationInfo) -> Any:

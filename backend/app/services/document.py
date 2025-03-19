@@ -54,7 +54,7 @@ class DocumentService:
         logger.debug(
             f"Splitting document content into chunks (size: {len(document.content)} characters)"
         )
-        text_splitter = TextSplitter(chunk_size=1000, chunk_overlap=200)
+        text_splitter = TextSplitter(chunk_size=settings.CHUNK_SIZE, chunk_overlap=settings.CHUNK_OVERLAP)
         chunks = text_splitter.split_text(document.content)
         logger.debug(f"Document split into {len(chunks)} chunks")
 

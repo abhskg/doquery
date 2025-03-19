@@ -15,22 +15,22 @@ class TextSplitter:
     def __init__(
         self,
         chunk_size: int = 1000,
-        chunk_overlap: int = 200,
-        separator: str = "\n",
+        chunk_overlap: Optional[int] = None,
+        separator: str = "\n\n",
     ):
         """
         Initialize the text splitter.
 
         Args:
             chunk_size: Target size of each text chunk (in characters)
-            chunk_overlap: Number of characters of overlap between chunks
+            chunk_overlap: Number of characters of overlap between chunks (default: 10% of chunk_size)
             separator: Default separator to split on if needed
         """
         self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
+        self.chunk_overlap = chunk_overlap if chunk_overlap is not None else int(chunk_size * 0.1)
         self.separator = separator
         logger.debug(
-            f"Initialized TextSplitter with chunk_size={chunk_size}, chunk_overlap={chunk_overlap}"
+            f"Initialized TextSplitter with chunk_size={chunk_size}, chunk_overlap={self.chunk_overlap}"
         )
 
     def split_text(self, text: str) -> List[str]:
@@ -63,7 +63,7 @@ class TextSplitter:
             # Try to find a good stopping point
             end_idx = start_idx + self.chunk_size
 
-            # Try to break at paragraph
+            # Only try to break at paragraph
             paragraph_break = text.rfind("\n\n", start_idx, end_idx)
             if (
                 paragraph_break != -1
@@ -72,24 +72,10 @@ class TextSplitter:
                 end_idx = paragraph_break + 2  # Include the double newline
                 logger.debug(f"Found paragraph break at index {paragraph_break}")
             else:
-                # Try to break at sentence
-                sentence_break = self._find_sentence_end(text, start_idx, end_idx)
-                if sentence_break != -1:
-                    end_idx = sentence_break + 1  # Include the period
-                    logger.debug(f"Found sentence break at index {sentence_break}")
-                else:
-                    # Just break at a space if possible
-                    space_break = text.rfind(" ", start_idx, end_idx)
-                    if (
-                        space_break != -1
-                        and space_break > start_idx + self.chunk_size // 2
-                    ):
-                        end_idx = space_break + 1
-                        logger.debug(f"Found space break at index {space_break}")
-                    else:
-                        logger.debug(
-                            f"No clean break found, using hard cutoff at index {end_idx}"
-                        )
+                # If no paragraph break, use hard cutoff
+                logger.debug(
+                    f"No paragraph break found, using hard cutoff at index {end_idx}"
+                )
 
             # Add the chunk
             chunks.append(text[start_idx:end_idx])
