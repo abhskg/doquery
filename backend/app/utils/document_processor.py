@@ -37,19 +37,19 @@ class DocumentProcessor:
             if file_ext == '.pdf':
                 logger.debug(f"Processing PDF file: {filename}")
                 try:
-                    import PyPDF2
-                    pdf_reader = PyPDF2.PdfReader(io.BytesIO(content))
-                    extracted_text = ""
-                    for page_num in range(len(pdf_reader.pages)):
-                        page = pdf_reader.pages[page_num]
-                        extracted_text += page.extract_text() + "\n\n"
+                    import fitz  # PyMuPDF
+                    with fitz.open(stream=content, filetype="pdf") as pdf_doc:
+                        extracted_text = ""
+                        for page_num in range(len(pdf_doc)):
+                            page = pdf_doc[page_num]
+                            extracted_text += page.get_text() + "\n\n"
                     logger.debug(f"Extracted {len(extracted_text)} characters from PDF")
                     content_type = "application/pdf"
                 except ImportError:
-                    logger.error("PyPDF2 is not installed. Cannot process PDF files.")
+                    logger.error("PyMuPDF is not installed. Cannot process PDF files.")
                     raise HTTPException(
                         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                        detail="PDF processing is not available. Please install PyPDF2 library."
+                        detail="PDF processing is not available. Please install PyMuPDF library."
                     )
                 except Exception as e:
                     logger.error(f"Error extracting text from PDF: {str(e)}")
