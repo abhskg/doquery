@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import documents, queries, guidelines, search
+from app.api.endpoints import documents, guidelines, queries, search
 
 api_router = APIRouter()
 

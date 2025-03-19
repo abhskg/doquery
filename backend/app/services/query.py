@@ -1,8 +1,9 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from sqlalchemy.orm import Session
 
-from app.models.document import DocumentChunk
 from app.ml.provider import get_model_provider
+from app.models.document import DocumentChunk
 
 
 class QueryService:

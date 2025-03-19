@@ -1,10 +1,10 @@
-import secrets
 import os
-from typing import Any, Dict, List, Optional, Union, Literal
+import secrets
+from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import AnyHttpUrl, PostgresDsn, field_validator, ValidationInfo
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
+from pydantic import AnyHttpUrl, PostgresDsn, ValidationInfo, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 

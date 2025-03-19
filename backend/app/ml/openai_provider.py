@@ -1,6 +1,7 @@
 """OpenAI model provider implementation."""
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 import tiktoken
 from openai import OpenAI
 

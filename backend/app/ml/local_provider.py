@@ -1,10 +1,11 @@
 """Local model provider implementation using locally deployed models."""
 
-import os
 import json
-import requests
-from typing import List, Dict, Any
+import os
+from typing import Any, Dict, List
+
 import numpy as np
+import requests
 
 from app.core.config import settings
 from app.ml.base import ModelProvider

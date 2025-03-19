@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, File, UploadFile, status
 from typing import List
+
+from fastapi import APIRouter, Depends, File, UploadFile, status
 
 router = APIRouter()
 

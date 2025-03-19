@@ -1,7 +1,8 @@
 """HuggingFace model provider implementation using HuggingFace API."""
 
+from typing import Any, Dict, List
+
 import requests
-from typing import List, Dict, Any
 
 from app.core.config import settings
 from app.ml.base import ModelProvider

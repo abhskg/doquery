@@ -5,8 +5,9 @@ This script creates the database and installs the pgvector extension if needed.
 """
 
 import logging
-import sys
 import os
+import sys
+
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -24,7 +25,9 @@ logger = logging.getLogger(__name__)
 try:
     from app.core.config import settings
 except ImportError:
-    logger.error("Could not import settings. Make sure you're running this script from the correct directory.")
+    logger.error(
+        "Could not import settings. Make sure you're running this script from the correct directory."
+    )
     sys.exit(1)
 
 
@@ -40,16 +43,18 @@ def setup_database():
             password=settings.POSTGRES_PASSWORD,
             host=settings.POSTGRES_SERVER,
             port=settings.POSTGRES_PORT,
-            database="postgres"
+            database="postgres",
         )
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = conn.cursor()
-        
+
         # Check if our database exists
         logger.info(f"Checking if database '{settings.POSTGRES_DB}' exists...")
-        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (settings.POSTGRES_DB,))
+        cursor.execute(
+            "SELECT 1 FROM pg_database WHERE datname = %s", (settings.POSTGRES_DB,)
+        )
         db_exists = cursor.fetchone()
-        
+
         # Create database if it doesn't exist
         if not db_exists:
             logger.info(f"Creating database '{settings.POSTGRES_DB}'...")
@@ -57,27 +62,27 @@ def setup_database():
             logger.info(f"Database '{settings.POSTGRES_DB}' created successfully.")
         else:
             logger.info(f"Database '{settings.POSTGRES_DB}' already exists.")
-        
+
         # Close connection to postgres database
         cursor.close()
         conn.close()
-        
+
         # Connect to our app database to set up pgvector
         conn = psycopg2.connect(
             user=settings.POSTGRES_USER,
             password=settings.POSTGRES_PASSWORD,
             host=settings.POSTGRES_SERVER,
             port=settings.POSTGRES_PORT,
-            database=settings.POSTGRES_DB
+            database=settings.POSTGRES_DB,
         )
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = conn.cursor()
-        
+
         # Check if pgvector extension is installed
         logger.info("Checking if pgvector extension is installed...")
         cursor.execute("SELECT 1 FROM pg_extension WHERE extname = 'vector'")
         vector_exists = cursor.fetchone()
-        
+
         # Create pgvector extension if it doesn't exist
         if not vector_exists:
             logger.info("Installing pgvector extension...")
@@ -86,18 +91,22 @@ def setup_database():
                 logger.info("pgvector extension installed successfully.")
             except psycopg2.Error as e:
                 logger.error(f"Failed to install pgvector extension: {str(e)}")
-                logger.error("You may need to install the pgvector extension in your PostgreSQL server first.")
-                logger.error("See https://github.com/pgvector/pgvector for installation instructions.")
+                logger.error(
+                    "You may need to install the pgvector extension in your PostgreSQL server first."
+                )
+                logger.error(
+                    "See https://github.com/pgvector/pgvector for installation instructions."
+                )
         else:
             logger.info("pgvector extension is already installed.")
-        
+
         # Close connection
         cursor.close()
         conn.close()
-        
+
         logger.info("Database setup completed successfully.")
         return True
-        
+
     except psycopg2.Error as e:
         logger.error(f"Database setup error: {str(e)}")
         return False
@@ -110,11 +119,12 @@ if __name__ == "__main__":
     logger.info("Starting database setup...")
     if setup_database():
         logger.info("Database setup successful!")
-        
+
         # Run database initialization to create tables
         logger.info("Now initializing database tables...")
         try:
             from app.db.init_db import init_db
+
             init_db()
             logger.info("Database tables created successfully!")
         except Exception as e:
@@ -122,4 +132,4 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         logger.error("Database setup failed.")
-        sys.exit(1) 
+        sys.exit(1)

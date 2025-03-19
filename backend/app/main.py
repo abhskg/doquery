@@ -1,11 +1,12 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 
 from app.api.router import api_router
 from app.core.config import settings
-from app.db.init_db import init_db
 from app.core.logging_config import configure_logging, get_logger
+from app.db.init_db import init_db
 
 # Configure logging
 configure_logging()
