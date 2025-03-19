@@ -17,6 +17,7 @@ from app.core.logging_config import get_logger
 from app.db.session import get_db
 from app.schemas.document import DocumentChunkResponse, DocumentResponse
 from app.services.document import DocumentService
+from app.utils.document_processor import DocumentProcessor
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -47,11 +48,12 @@ async def upload_document(
 ):
     """
     Upload a document to be processed and embedded.
+    Supports text files, PDF, and DOCX document formats.
     """
     try:
         logger.info(f"Document upload started: {file.filename}")
 
-        # Check file size (limit to 10MB for example)
+        # Check file size (limit to 100MB)
         file_size = 0
         chunk_size = 1024 * 4  # 4KB chunks
         content_chunks = []
@@ -75,41 +77,47 @@ async def upload_document(
 
         # Read file content
         content = b"".join(content_chunks)
-
+        
+        # Extract text using document processor
         try:
-            content_str = content.decode("utf-8")
-            logger.debug(f"Successfully decoded file content as UTF-8")
-        except UnicodeDecodeError:
-            logger.warning(f"File {file.filename} is not UTF-8 encoded")
-            raise HTTPException(
-                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail="File encoding not supported. Please upload a UTF-8 encoded text file.",
+            content_str, detected_content_type = DocumentProcessor.extract_text(
+                content=content, 
+                filename=file.filename
+            )
+            
+            # Create document in database
+            logger.debug(f"Creating document record in database for {file.filename}")
+            document = DocumentService.create_document(
+                db=db,
+                filename=file.filename,
+                content_type=detected_content_type or file.content_type,
+                content=content_str,
             )
 
-        # Create document in database
-        logger.debug(f"Creating document record in database for {file.filename}")
-        document = DocumentService.create_document(
-            db=db,
-            filename=file.filename,
-            content_type=file.content_type,
-            content=content_str,
-        )
+            # Process document in background
+            logger.info(f"Scheduling background processing for document {document.id}")
+            background_tasks.add_task(
+                process_document_background, db=db, document_id=str(document.id)
+            )
 
-        # Process document in background
-        logger.info(f"Scheduling background processing for document {document.id}")
-        background_tasks.add_task(
-            process_document_background, db=db, document_id=str(document.id)
-        )
-
-        logger.info(
-            f"Document {document.id} uploaded successfully, processing scheduled"
-        )
-        return {
-            "id": document.id,
-            "filename": document.filename,
-            "status": "Document uploaded and processing started",
-            "created_at": document.created_at,
-        }
+            logger.info(
+                f"Document {document.id} uploaded successfully, processing scheduled"
+            )
+            return {
+                "id": document.id,
+                "filename": document.filename,
+                "status": "Document uploaded and processing started",
+                "created_at": document.created_at,
+            }
+        except HTTPException:
+            # Re-raise HTTP exceptions
+            raise
+        except Exception as e:
+            logger.error(f"Error processing document upload: {str(e)}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error processing document: {str(e)}",
+            )
     except HTTPException:
         # Re-raise HTTP exceptions
         raise
