@@ -3,6 +3,9 @@
 import re
 from typing import List, Optional, Union
 import tiktoken
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class Tokenizer:
@@ -17,10 +20,13 @@ class Tokenizer:
         Args:
             model_name: The name of the model to use for tokenization
         """
+        logger.debug(f"Initializing tokenizer for model: {model_name}")
         try:
             self.encoding = tiktoken.encoding_for_model(model_name)
+            logger.debug(f"Using tiktoken encoding for model: {model_name}")
         except KeyError:
             # Fall back to cl100k_base encoding (used for gpt-4, text-embedding-3-*)
+            logger.warning(f"No specific encoding found for {model_name}, falling back to cl100k_base")
             self.encoding = tiktoken.get_encoding("cl100k_base")
     
     def count_tokens(self, text: Union[str, List[str]]) -> Union[int, List[int]]:
@@ -34,11 +40,18 @@ class Tokenizer:
             Token count or list of token counts
         """
         if isinstance(text, str):
-            return len(self.encoding.encode(text))
+            token_count = len(self.encoding.encode(text))
+            logger.debug(f"Counted {token_count} tokens in string (length: {len(text)})")
+            return token_count
         elif isinstance(text, list):
-            return [len(self.encoding.encode(t)) for t in text]
+            token_counts = [len(self.encoding.encode(t)) for t in text]
+            total_tokens = sum(token_counts)
+            logger.debug(f"Counted {total_tokens} total tokens across {len(text)} strings")
+            return token_counts
         else:
-            raise TypeError("Input must be a string or list of strings")
+            error_msg = f"Input must be a string or list of strings, got {type(text)}"
+            logger.error(error_msg)
+            raise TypeError(error_msg)
     
     def tokenize(self, text: str) -> List[int]:
         """
@@ -50,7 +63,9 @@ class Tokenizer:
         Returns:
             List of token IDs
         """
-        return self.encoding.encode(text)
+        tokens = self.encoding.encode(text)
+        logger.debug(f"Tokenized string into {len(tokens)} tokens")
+        return tokens
     
     def decode(self, tokens: List[int]) -> str:
         """
@@ -62,4 +77,6 @@ class Tokenizer:
         Returns:
             Decoded string
         """
-        return self.encoding.decode(tokens) 
+        text = self.encoding.decode(tokens)
+        logger.debug(f"Decoded {len(tokens)} tokens into string (length: {len(text)})")
+        return text 

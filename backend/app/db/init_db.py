@@ -1,14 +1,14 @@
 """Database initialization script."""
 
-import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import text
 
 from app.db.base import Base
 from app.db.session import engine
+from app.core.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def init_db() -> None:
@@ -16,9 +16,13 @@ def init_db() -> None:
     Initialize the database by creating all tables.
     """
     try:
+        logger.info("Starting database initialization")
+        
         # Create tables
+        logger.info("Creating database tables")
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
+        
         # Log database connection details
         db_url = str(engine.url).replace(":*****@", "@")  # Hide password
         logger.info(f"Database connection details: {db_url}")
@@ -27,6 +31,7 @@ def init_db() -> None:
         with engine.connect() as conn:
             try:
                 # Use text() to create a properly executable SQL statement
+                logger.debug("Checking for pgvector extension")
                 result = conn.execute(text("SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector')"))
                 if result.scalar():
                     logger.info("pgvector extension is installed")
@@ -38,15 +43,14 @@ def init_db() -> None:
                 logger.warning("pgvector extension not found. Vector search may not work properly.")
                 logger.info("You can install pgvector with 'CREATE EXTENSION vector;' in your PostgreSQL database.")
         
-        logger.info("Database initialization completed")
+        logger.info("Database initialization completed successfully")
     except Exception as e:
-        logger.error(f"Error initializing database: {str(e)}")
+        logger.error(f"Error initializing database: {str(e)}", exc_info=True)
         raise
 
 
 if __name__ == "__main__":
-    # Initialize logging
-    logging.basicConfig(level=logging.INFO)
-    logger.info("Initializing database...")
+    # Initialize logging through our config module
+    logger.info("Initializing database from command line...")
     init_db()
     logger.info("Database initialization script completed") 

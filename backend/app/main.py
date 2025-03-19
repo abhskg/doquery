@@ -5,13 +5,11 @@ import logging
 from app.api.router import api_router
 from app.core.config import settings
 from app.db.init_db import init_db
+from app.core.logging_config import configure_logging, get_logger
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
+configure_logging()
+logger = get_logger(__name__)
 
 app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json"
@@ -38,11 +36,12 @@ async def startup_db_client():
         init_db()
         logger.info("Database initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize database: {str(e)}")
+        logger.error(f"Failed to initialize database: {str(e)}", exc_info=True)
         # Don't raise exception here to allow app to start even if DB init fails
         # This allows the app to provide meaningful error messages through the API
 
 
 @app.get("/")
 def root():
+    logger.debug("Root endpoint accessed")
     return {"message": "RAG Query API"}
