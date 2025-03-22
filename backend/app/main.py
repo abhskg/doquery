@@ -18,12 +18,15 @@ app = FastAPI(
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:
+    logger.info(f"Setting CORS with origins: {settings.BACKEND_CORS_ORIGINS}")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:[0-9]+)?",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["Content-Type", "Authorization"]
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
