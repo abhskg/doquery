@@ -75,6 +75,7 @@ frontend/.env
 .next/
 out/
 build/
+frontend/.next/
 
 # Tailwind CSS
 *.css
